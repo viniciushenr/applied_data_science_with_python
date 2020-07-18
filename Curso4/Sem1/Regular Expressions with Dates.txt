@@ -1,0 +1,13 @@
+r'(?:\d{1,2} )?(?:Jan|Feb|Mar|Apr|May|Jun|Aug|Sep|Oct|Nov|Dec)[a-z]* (?:\d{1,2}, )?\d{4}'
+Retorna:
+23 Oct 2002
+23 October 2002
+Oct 23, 2002
+October 23, 2002
+
+r'\d{1,2}[/-]\d{1,2}[/-]\d{2,4}'
+Retorna:
+23-10-2002
+23/10/2002
+23/10/02
+10/23/2002

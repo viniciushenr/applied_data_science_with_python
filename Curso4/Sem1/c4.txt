@@ -1,0 +1,101 @@
+a = []
+for i in range(0, df.shape[0]):
+    #Para o caso de #04/20/2009; 04/20/09; 4/20/09; 4/3/09
+    extract = re.findall(r'\d{1,2}[/-]\d{1,2}[/-]\d{2,4}', df[i])
+    
+    
+        
+    #Lista vazia, necessita de outra regular expression
+    if len(extract) == 0:
+        #Para o caso de #Mar-20-2009; Mar 20, 2009; March 20, 2009; Mar. 20, 2009; Mar 20 2009
+        # e Para o caso de #Feb 2009; Sep 2009; Oct 2010
+        # e Para o caso de #Mar 20th, 2009; Mar 21st, 2009; Mar 22nd, 2009
+        extract = re.findall(r'(?:\d{1,2}[-/th|st|nd|rd\s]* )?(?:Jan|Feb|Mar|Apr|May|Jun|Aug|Sep|Oct|Nov|Dec)[a-z]* (?:\d{1,2}, )?\d{4}', df[i])
+        
+        
+        
+        if len(extract) == 0:
+            #Para o caso de #6/2008; 12/2009
+            extract = re.findall(r'\d{1,2}[/-]\d{2,4}', df[i])
+            
+            if len(extract) == 0:
+                #Para o caso de #Mar 20th, 2009; Mar 21st, 2009; Mar 22nd, 2009
+                extract = re.findall(r'(?:Jan|Feb|Mar|Apr|May|Jun|Aug|Sep|Oct|Nov|Dec) (?:\d{1,2}[-/th|st|nd|rd\s]* ), ?\d{4}', df[i])
+                
+            #if len(extract) == 0:
+            #    # Para o caso de #2009; 2010
+            #    extract = re.findall(r'\d{4}', df[i])
+            
+    #Para uma ocorrência que obteve resultado de [7-06-94, 6-36-308]
+    if len(extract) == 2:
+        extract = extract[0]
+        
+    #Para uma ocorrência que obteve resultado de 7-01-77
+    if not type(extract) == list:
+        extract = [extract]
+        
+    a.append(extract)
+a
+
+#Mar-20-2009; Mar 20, 2009; March 20, 2009; Mar. 20, 2009; Mar 20 2009;
+from datetime import datetime
+replace = {'Janaury':'January', 'Decemeber':'December'}
+a = []
+for i in range(0, df.shape[0]):
+    #Para o caso de #04/20/2009; 04/20/09; 4/20/09; 4/3/09
+    extract = re.findall(r'\d{1,2}[/-]\d{1,2}[/-]\d{2,4}', df[i])
+    
+    #Primeiros valores da extração
+    if not len(extract) == 0:
+        if len(extract[0]) == 6 or len(extract[0]) == 7 or len(extract[0]) == 8: #m/d/yy or mm/d/yy or m/dd/yy or mm/dd/yy
+            try:
+                extract[0] = datetime.strptime(extract[0],'%m/%d/%y').strftime('%m/%d/%Y')
+            except:
+                extract[0] = datetime.strptime(extract[0],'%m-%d-%y').strftime('%m/%d/%Y')
+        
+    #Lista vazia, necessita de outra regular expression
+    if len(extract) == 0:
+        #Para o caso de #Mar-20-2009; Mar 20, 2009; March 20, 2009; Mar. 20, 2009; Mar 20 2009
+        # e Para o caso de #Feb 2009; Sep 2009; Oct 2010
+        # e Para o caso de #Mar 20th, 2009; Mar 21st, 2009; Mar 22nd, 2009
+        extract = re.findall(r'(?:\d{1,2}[-/th|st|nd|rd\s]* )?(?:Jan|Feb|Mar|Apr|May|Jun|Aug|Sep|Oct|Nov|Dec)[a-z]* (?:\d{1,2}, )?\d{4}', df[i])
+        
+        if not len(extract) == 0:
+            try:
+                extract[0] = datetime.strptime(extract[0],'%d %b %Y').strftime('%m/%d/%Y')
+            except:
+                try:
+                    extract[0] = datetime.strptime(extract[0],'%d %B %Y').strftime('%m/%d/%Y')
+                except:
+                    pass
+            try:
+                extract[0] = datetime.strptime(extract[0],'%b %d, %Y').strftime('%m/%d/%Y')
+            except:
+                try:
+                    extract[0] = datetime.strptime(extract[0],'%B %d, %Y').strftime('%m/%d/%Y')
+                except:
+                    pass
+            try:
+                extract[0] = datetime.strptime(extract[0],'%b %Y').strftime('%m/{d}/%Y'.format(d='01'))
+            except:
+                try:
+                    extract[0] = datetime.strptime(extract[0],'%B %Y').strftime('%m/{d}/%Y'.format(d='01'))
+                except:
+                    pass
+        
+        if len(extract) == 0:
+            #Para o caso de #6/2008; 12/2009
+            extract = re.findall(r'\d{1,2}[/-]\d{2,4}', df[i])
+            if not len(extract) == 0:
+                try:
+                    extract[0] = datetime.strptime(extract[0],'%m/%Y').strftime('%m/{d}/%Y'.format(d='01'))
+                except:
+                    try:
+                        extract[0] = datetime.strptime(extract[0],'%m-%Y').strftime('%m/{d}/%Y'.format(d='01'))
+                    except:
+                        pass
+            if len(extract) == 0:
+                extract = re.findall(r'(?:Jan|Feb|Mar|Apr|May|Jun|Aug|Sep|Oct|Nov|Dec) (?:[0-9]{2}|[0-9])[rdth]{2}, ?\d{4}', df[i])
+                #print(extract)
+    a.append(extract)
+a
